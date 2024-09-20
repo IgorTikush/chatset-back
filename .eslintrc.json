@@ -1,0 +1,320 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:import/recommended",
+    "plugin:import/typescript"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "module"
+  },
+  "plugins": [
+    "@typescript-eslint",
+    "better-max-params"
+  ],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": [
+      "off"
+    ],
+    "padding-line-between-statements": [
+      "warn",
+      { "blankLine": "always", "prev": ["if", "switch", "while", "function", "multiline-const", "try", "for"], "next": "*" },
+      { "blankLine": "always", "prev": "*", "next": ["return"] }
+    ],
+    "indent": [
+      "warn",
+      2,
+      {
+        "SwitchCase": 1,
+        "ignoredNodes": [
+          "ClassBody.body > PropertyDefinition[decorators.length > 0] > .key"
+        ]
+      }
+    ],
+    "linebreak-style": [
+      "warn",
+      "unix"
+    ],
+    "keyword-spacing": ["error", { "before": true }],
+    "padded-blocks": ["error", "never"],
+    "space-before-blocks": [
+      "error",
+      {
+        "functions": "always",
+        "keywords": "always",
+        "classes": "always"
+      }
+    ],
+    "quotes": [
+      "warn",
+      "single"
+    ],
+    "semi": [
+      "warn",
+      "always"
+    ],
+    "array-callback-return": [
+      "warn"
+    ],
+    "no-await-in-loop": [
+      "off"
+    ],
+    "no-duplicate-imports": [
+      "warn"
+    ],
+    "arrow-body-style": [
+      "warn",
+      "as-needed"
+    ],
+    "curly": [
+      "warn",
+      "all"
+    ],
+    "default-case": [
+      "warn"
+    ],
+    "default-case-last": [
+      "warn"
+    ],
+    "dot-notation": [
+      "warn"
+    ],
+    "eqeqeq": [
+      "warn",
+      "always"
+    ],
+    "id-length": [
+      "warn",
+      {
+        "min": 1,
+        "max": 40,
+        "properties": "never"
+      }
+    ],
+    "max-depth": [
+      "warn",
+      {
+        "max": 4
+      }
+    ],
+    "max-lines": [
+      "warn",
+      1500
+    ],
+    "better-max-params/better-max-params": [
+      "warn",
+      {
+        "func": 3,
+        "constructor": 15
+      }
+    ],
+    "no-else-return": [
+      "warn",
+      {
+        "allowElseIf": true
+      }
+    ],
+    "no-empty-function": [
+      "warn",
+      {
+        "allow": ["constructors"]
+      }
+    ],
+    "no-inline-comments": [
+      "warn"
+    ],
+    "no-labels": [
+      "warn"
+    ],
+    "no-lone-blocks": [
+      "warn"
+    ],
+    "no-lonely-if": [
+      "warn"
+    ],
+    "no-magic-numbers": [
+      "off",
+      {
+        "ignoreArrayIndexes": true,
+        "ignoreDefaultValues": true,
+        "ignore": [1, 2, 3, 10, 1000, -1, 0]
+      }
+    ],
+    "no-multi-assign": [
+      "warn"
+    ],
+    "no-multi-str": [
+      "warn"
+    ],
+    "no-nested-ternary": [
+      "warn"
+    ],
+    "no-return-assign": [
+      "warn"
+    ],
+    "no-return-await": [
+      "warn"
+    ],
+    "no-sequences": [
+      "warn"
+    ],
+    "no-shadow": [
+      "warn"
+    ],
+    "no-undefined": [
+      "warn"
+    ],
+    "no-underscore-dangle": [
+      "warn",
+      {
+        "allow": ["_id"]
+      }
+    ],
+    "no-unneeded-ternary": [
+      "warn"
+    ],
+    "no-unused-expressions": [
+      "warn",
+      {
+        "allowShortCircuit": true,
+        "allowTernary": true
+      }
+    ],
+    "no-useless-return": [
+      "warn"
+    ],
+    "object-shorthand": [
+      "warn",
+      "always"
+    ],
+    "prefer-arrow-callback": [
+      "warn"
+    ],
+    "prefer-const": [
+      "warn"
+    ],
+    "prefer-destructuring": [
+      "warn"
+    ],
+    "prefer-object-spread": [
+      "warn"
+    ],
+    "prefer-spread": [
+      "warn"
+    ],
+    "prefer-template": [
+      "off"
+    ],
+    "spaced-comment": [
+      "warn"
+    ],
+    "yoda": [
+      "warn"
+    ],
+    "arrow-spacing": [
+      "warn"
+    ],
+    "brace-style": [
+      "warn",
+      "1tbs",
+      { "allowSingleLine": false }
+    ],
+    "comma-dangle": [
+      "warn",
+      "always-multiline"
+    ],
+    "dot-location": [
+      "warn",
+      "property"
+    ],
+    "eol-last": [
+      "warn"
+    ],
+    "no-extra-parens": [
+      "off"
+    ],
+    "no-multiple-empty-lines": [
+      "warn",
+      {
+        "max": 1
+      }
+    ],
+    "no-trailing-spaces": [
+      "warn"
+    ],
+    "no-whitespace-before-property": [
+      "warn"
+    ],
+    "object-curly-spacing": [
+      "warn",
+      "always"
+    ],
+    "space-in-parens": [
+      "warn"
+    ],
+    "template-curly-spacing": [
+      "warn"
+    ],
+    "array-bracket-spacing": [
+      "warn"
+    ],
+    "max-len": [
+      "warn",
+      150
+    ],
+    "import/order": [
+      "warn",
+      {
+        "groups": [
+          "builtin",
+          "external",
+          "internal"
+        ],
+        "newlines-between": "always",
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true
+        }
+      }
+    ],
+    "import/namespace": [
+      "off"
+    ],
+    "@typescript-eslint/explicit-function-return-type": [
+      "off"
+    ],
+    "@typescript-eslint/no-empty-interface": [
+      "warn"
+    ],
+    "@typescript-eslint/prefer-as-const": [
+      "warn"
+    ],
+    "@typescript-eslint/member-delimiter-style": [
+      "warn"
+    ],
+    "@typescript-eslint/no-var-requires": [
+      "off"
+    ],
+//    в констукторе выделяет переменные, нужно разобраться
+//    "no-unused-vars": [
+//      "warn",
+//      {
+//        "varsIgnorePattern": "_",
+//        "args": "all"
+//      }
+//    ],
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      {
+        "varsIgnorePattern": "_"
+      }
+    ]
+  }
+}
