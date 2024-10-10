@@ -17,7 +17,7 @@ export class MessagesController {
 
   @Post()
   @Sse()
-  // @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'))
   async create(@Body() createMessageDto: any, @Req() { user }: any): Promise<any> {
     console.log(createMessageDto);
     if (!['gpt-3.5-turbo', 'gpt-4o-mini', 'gpt-4', 'gpt-4-turbo', 'gpt-4o'].includes(createMessageDto.model)) {
@@ -25,7 +25,8 @@ export class MessagesController {
       throw new BadRequestException('модель не поддерживается');
     }
 
-    await this.userService.addRequest(user._id);
+    await this.userService.addRequest(user._id).catch(console.log);
+
     const openai = new OpenAI();
 
     return new Observable((subscriber) => {
