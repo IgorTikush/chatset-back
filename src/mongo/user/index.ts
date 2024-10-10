@@ -8,6 +8,7 @@ export const UserSchema = new mongoose.Schema({
     lowercase: true,
     trim: true,
   },
+  requests: Number,
   password: String,
   isBlocked: Boolean,
   lastActivity: Date,

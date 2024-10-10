@@ -101,6 +101,16 @@ export class UserService {
     });
   }
 
+  async addRequest(userId: string) {
+    return this.userModel.updateOne({
+      _id: userId,
+    }, {
+      $inc: {
+        requests: 1,
+      },
+    });
+  }
+
   findUserById(id: string, projection = {}): Promise<any> {
     return this.userModel.findOne({ _id: id }, projection).lean() as any;
   }
