@@ -46,6 +46,21 @@ export class MessagesController {
     });
   }
 
+  @Post('image')
+  @UseGuards(AuthGuard('jwt'))
+  async getImage(@Body() createMessageDto: any, @Req() { user }: any): Promise<any> {
+    if (!['dall-e-3'].includes(createMessageDto.model)) {
+      console.log('throw');
+      throw new BadRequestException('модель не поддерживается');
+    }
+
+    const openai = new OpenAI();
+
+    await this.userService.addRequest(user._id).catch(console.log);
+
+    return openai.images.generate(createMessageDto)
+  }
+
   @Get()
   findAll() {
     return this.messagesService.findAll();
