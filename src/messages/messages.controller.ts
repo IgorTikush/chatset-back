@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Sse, UseGuards, Req, BadRequestException } from '@nestjs/common';
 import OpenAI from 'openai';
 import { Observable } from 'rxjs';
+import * as config from 'config';
 
 // import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
@@ -19,7 +20,6 @@ export class MessagesController {
   @Sse()
   @UseGuards(AuthGuard('jwt'))
   async create(@Body() createMessageDto: any, @Req() { user }: any): Promise<any> {
-    console.log(createMessageDto);
     if (!['gpt-3.5-turbo', 'gpt-4o-mini', 'gpt-4', 'gpt-4-turbo', 'gpt-4o'].includes(createMessageDto.model)) {
       console.log('throw');
       throw new BadRequestException('модель не поддерживается');
@@ -59,6 +59,34 @@ export class MessagesController {
     await this.userService.addRequest(user._id).catch(console.log);
 
     return openai.images.generate(createMessageDto)
+  }
+
+  @Post('stability/:model')
+  @UseGuards(AuthGuard('jwt'))
+  async getStabilityImage(
+    @Body() createMessageDto: any,
+    @Param('model') model: any,
+    @Req() { user }: any,
+  ): Promise<any> {
+    console.log('model', model);
+    createMessageDto = JSON.parse(createMessageDto);
+
+    const formData = new FormData();
+    for (let paramsKey in createMessageDto) {
+      console.log(paramsKey)
+      formData.append(paramsKey, createMessageDto[paramsKey]);
+    }
+
+    const res = await fetch(`https://api.stability.ai/v2beta/stable-image/generate/${model}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${config.get('stabilityKey')}`,
+        Accept: 'application/json',
+      },
+      body: formData,
+    });
+
+    return res.json();
   }
 
   @Get()
