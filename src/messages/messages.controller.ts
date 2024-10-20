@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Sse, UseGuards, Req,
 import OpenAI from 'openai';
 import { Observable } from 'rxjs';
 import * as config from 'config';
+import Anthropic from '@anthropic-ai/sdk';
 
 // import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
@@ -24,8 +25,6 @@ export class MessagesController {
       console.log('throw');
       throw new BadRequestException('модель не поддерживается');
     }
-
-    await this.userService.addRequest(user._id).catch(console.log);
 
     const openai = new OpenAI();
 
@@ -58,7 +57,7 @@ export class MessagesController {
 
     await this.userService.addRequest(user._id).catch(console.log);
 
-    return openai.images.generate(createMessageDto)
+    return openai.images.generate(createMessageDto);
   }
 
   @Post('stability/:model')
@@ -87,6 +86,40 @@ export class MessagesController {
     });
 
     return res.json();
+  }
+
+  @Post('/claude')
+  @Sse()
+  @UseGuards(AuthGuard('jwt'))
+  async createClaudeMessage(@Body() createMessageDto: any, @Req() { user }: any): Promise<any> {
+    console.log('received claude', createMessageDto);
+    // if (!['gpt-3.5-turbo', 'gpt-4o-mini', 'gpt-4', 'gpt-4-turbo', 'gpt-4o'].includes(createMessageDto.model)) {
+    //   console.log('throw');
+    //   throw new BadRequestException('модель не поддерживается');
+    // }
+    const client = new Anthropic();
+
+    // await this.userService.addRequest(user._id).catch(console.log);
+
+    return new Observable((subscriber) => {
+      const stream = client.messages.stream({
+        model: createMessageDto.model,
+        messages: createMessageDto.messages,
+        max_tokens: createMessageDto.max_tokens,
+        // stream: true,
+      });
+
+      const processStream = async () => {
+        for await (const event of stream) {
+          subscriber.next({ data: event });
+        }
+
+        this.userService.addRequest(user._id);
+        subscriber.complete();
+      };
+
+      processStream();
+    });
   }
 
   @Get()
