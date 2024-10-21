@@ -9,6 +9,7 @@ import { UpdateMessageDto } from './dto/update-message.dto';
 import { MessagesService } from './messages.service';
 import { AuthGuard } from '@nestjs/passport';
 import { UserService } from 'src/user/user.service';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 @Controller('messages')
 export class MessagesController {
@@ -111,6 +112,38 @@ export class MessagesController {
 
       const processStream = async () => {
         for await (const event of stream) {
+          subscriber.next({ data: event });
+        }
+
+        this.userService.addRequest(user._id);
+        subscriber.complete();
+      };
+
+      processStream();
+    });
+  }
+
+  @Post('/google')
+  @Sse()
+  @UseGuards(AuthGuard('jwt'))
+  async createGeminiMessage(@Body() createMessageDto: any, @Req() { user }: any): Promise<any> {
+    console.log('received gemini', createMessageDto);
+    const apiKey = config.get('geminiKey');
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+      model: createMessageDto.model,
+    });
+
+    const chatSession = model.startChat({
+      generationConfig: createMessageDto.generationConfig,
+      history: createMessageDto.contents,
+    });
+
+    const stream = await chatSession.sendMessageStream('');
+
+    return new Observable((subscriber) => {
+      const processStream = async () => {
+        for await (const event of stream.stream) {
           subscriber.next({ data: event });
         }
 
