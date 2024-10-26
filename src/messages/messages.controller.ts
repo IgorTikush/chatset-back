@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Sse, UseGuards, Req, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Sse, UseGuards, Req, BadRequestException, UseInterceptors } from '@nestjs/common';
 import OpenAI from 'openai';
 import { Observable } from 'rxjs';
 import * as config from 'config';
@@ -10,6 +10,7 @@ import { MessagesService } from './messages.service';
 import { AuthGuard } from '@nestjs/passport';
 import { UserService } from 'src/user/user.service';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { CustomInterceptors } from './guards/max-input-length.guard';
 
 @Controller('messages')
 export class MessagesController {
@@ -21,6 +22,7 @@ export class MessagesController {
   @Post()
   @Sse()
   @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(CustomInterceptors)
   async create(@Body() createMessageDto: any, @Req() { user }: any): Promise<any> {
     if (!['gpt-3.5-turbo', 'gpt-4o-mini', 'gpt-4', 'gpt-4-turbo', 'gpt-4o'].includes(createMessageDto.model)) {
       console.log('throw');
