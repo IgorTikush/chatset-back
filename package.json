@@ -38,6 +38,7 @@
     "compression": "^1.7.4",
     "config": "^3.3.9",
     "eslint-plugin-better-max-params": "^0.0.1",
+    "gpt-tokenizer": "^2.5.1",
     "helmet": "^6.0.1",
     "mongoose": "^7.0.0",
     "morgan": "^1.10.0",

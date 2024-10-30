@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { TokenModule } from './token/token.module';
 import { UserModule } from './user/user.module';
 import { MessagesModule } from './messages/messages.module';
+import { GlobalModule } from './global/global.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { MessagesModule } from './messages/messages.module';
     UserModule,
     AuthModule,
     MessagesModule,
+    GlobalModule,
   ],
   providers: [
     {

@@ -8,22 +8,25 @@ import Anthropic from '@anthropic-ai/sdk';
 import { UpdateMessageDto } from './dto/update-message.dto';
 import { MessagesService } from './messages.service';
 import { AuthGuard } from '@nestjs/passport';
-import { UserService } from 'src/user/user.service';
+import { UserService } from '../user/user.service';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { CustomInterceptors } from './guards/max-input-length.guard';
+import { GlobalService } from '../global/global.service';
 
 @Controller('messages')
 export class MessagesController {
   constructor(
     private readonly messagesService: MessagesService,
     private readonly userService: UserService,
+    private readonly globalService: GlobalService,
   ) {}
 
   @Post()
   @Sse()
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(CustomInterceptors)
-  async create(@Body() createMessageDto: any, @Req() { user }: any): Promise<any> {
+  async create(@Body() createMessageDto: any, @Req() req: any): Promise<any> {
+    const { user, tokenCounts } = req;
     if (!['gpt-3.5-turbo', 'gpt-4o-mini', 'gpt-4', 'gpt-4-turbo', 'gpt-4o'].includes(createMessageDto.model)) {
       console.log('throw');
       throw new BadRequestException('модель не поддерживается');
@@ -43,6 +46,7 @@ export class MessagesController {
         }
 
         this.userService.addRequest(user._id);
+        this.globalService.addGptInputToken(tokenCounts);
         subscriber.complete();
       });
     });
