@@ -93,6 +93,7 @@ export class MessagesController {
 
   @Post('/claude')
   @Sse()
+  @UseInterceptors(CustomInterceptors)
   @UseGuards(AuthGuard('jwt'))
   async createClaudeMessage(@Body() createMessageDto: any, @Req() { user }: any): Promise<any> {
     console.log('received claude', createMessageDto);
