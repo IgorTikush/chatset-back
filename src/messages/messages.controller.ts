@@ -3,6 +3,7 @@ import OpenAI from 'openai';
 import { Observable } from 'rxjs';
 import * as config from 'config';
 import Anthropic from '@anthropic-ai/sdk';
+import { encoding_for_model } from '@dqbd/tiktoken';
 
 // import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
@@ -27,26 +28,27 @@ export class MessagesController {
   @UseInterceptors(CustomInterceptors)
   async create(@Body() createMessageDto: any, @Req() req: any): Promise<any> {
     const { user, tokenCounts } = req;
-    if (!['gpt-3.5-turbo', 'gpt-4o-mini', 'gpt-4', 'gpt-4-turbo', 'gpt-4o'].includes(createMessageDto.model)) {
+    if (!['gpt-4o-mini', 'gpt-4o'].includes(createMessageDto.model)) {
       console.log('throw');
       throw new BadRequestException('модель не поддерживается');
     }
 
     const openai = new OpenAI();
-
+    let outputTokens = 0;
     return new Observable((subscriber) => {
       openai.chat.completions.create({
         model: createMessageDto.model,
         messages: createMessageDto.messages,
         stream: true,
       }).then(async (stream) => {
+        const enc = encoding_for_model(createMessageDto.model);
         for await (const chunk of stream) {
+          const tokens = enc.encode(chunk.choices[0]?.delta?.content || '');
+          outputTokens += tokens.length;
           subscriber.next({ data: chunk });
-          console.log(chunk.choices[0]?.delta?.content);
         }
-
         this.userService.addRequest(user._id);
-        this.globalService.addGptInputToken(tokenCounts);
+        this.globalService.addGptInputToken(tokenCounts, outputTokens);
         subscriber.complete();
       });
     });

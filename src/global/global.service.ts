@@ -8,7 +8,7 @@ export class GlobalService {
     @InjectModel('Global') private readonly globalModel: Model<any>,
   ) {}
 
-  async addGptInputToken(tokensCount: number) {
+  async addGptInputToken(tokensCount: number, outputTokens: number) {
     const currentDate = new Date();
 
     const day = String(currentDate.getDate()).padStart(2, '0');
@@ -20,6 +20,7 @@ export class GlobalService {
     }, {
       $inc: {
         gptInputTokens: tokensCount,
+        gptOutputTokens: outputTokens,
       },
     }, {
       new: true,
