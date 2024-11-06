@@ -8,7 +8,7 @@ export class GlobalService {
     @InjectModel('Global') private readonly globalModel: Model<any>,
   ) {}
 
-  async addGptInputToken(tokensCount: number, outputTokens: number) {
+  async addGptTokenCount(tokensCount: number, outputTokens: number) {
     const currentDate = new Date();
 
     const day = String(currentDate.getDate()).padStart(2, '0');
@@ -21,6 +21,26 @@ export class GlobalService {
       $inc: {
         gptInputTokens: tokensCount,
         gptOutputTokens: outputTokens,
+      },
+    }, {
+      new: true,
+      upsert: true,
+    }).then(console.log).catch(console.log);
+  }
+
+  async addClaudeTokenCount(tokensCount: number, outputTokens: number) {
+    const currentDate = new Date();
+
+    const day = String(currentDate.getDate()).padStart(2, '0');
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+    const year = currentDate.getFullYear();
+    const formattedDate = `${day}-${month}-${year}`;
+    const insertRes = await this.globalModel.updateOne({
+      date: formattedDate,
+    }, {
+      $inc: {
+        claudeInputTokens: tokensCount,
+        claudeOutputTokens: outputTokens,
       },
     }, {
       new: true,

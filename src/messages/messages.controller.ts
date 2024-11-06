@@ -11,7 +11,7 @@ import { MessagesService } from './messages.service';
 import { AuthGuard } from '@nestjs/passport';
 import { UserService } from '../user/user.service';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { CustomInterceptors } from './guards/max-input-length.guard';
+import { GptInterceptor } from './guards/max-input-length.guard';
 import { GlobalService } from '../global/global.service';
 
 @Controller('messages')
@@ -25,7 +25,7 @@ export class MessagesController {
   @Post()
   @Sse()
   @UseGuards(AuthGuard('jwt'))
-  @UseInterceptors(CustomInterceptors)
+  @UseInterceptors(GptInterceptor)
   async create(@Body() createMessageDto: any, @Req() req: any): Promise<any> {
     const { user, tokenCounts } = req;
     if (!['gpt-4o-mini', 'gpt-4o'].includes(createMessageDto.model)) {
@@ -48,7 +48,7 @@ export class MessagesController {
           subscriber.next({ data: chunk });
         }
         this.userService.addRequest(user._id);
-        this.globalService.addGptInputToken(tokenCounts, outputTokens);
+        this.globalService.addGptTokenCount(tokenCounts, outputTokens);
         subscriber.complete();
       });
     });
@@ -99,9 +99,9 @@ export class MessagesController {
 
   @Post('/claude')
   @Sse()
-  @UseInterceptors(CustomInterceptors)
+  @UseInterceptors(GptInterceptor)
   @UseGuards(AuthGuard('jwt'))
-  async createClaudeMessage(@Body() createMessageDto: any, @Req() { user }: any): Promise<any> {
+  async createClaudeMessage(@Body() createMessageDto: any, @Req() { user, tokenCounts }: any): Promise<any> {
     console.log('received claude', createMessageDto);
     // if (!['gpt-3.5-turbo', 'gpt-4o-mini', 'gpt-4', 'gpt-4-turbo', 'gpt-4o'].includes(createMessageDto.model)) {
     //   console.log('throw');
@@ -120,10 +120,14 @@ export class MessagesController {
       });
 
       const processStream = async () => {
+        let outputTokens = 0;
         for await (const event of stream) {
+          if ((event as any).usage) {
+            outputTokens = (event as any).usage?.output_tokens;
+          }
           subscriber.next({ data: event });
         }
-
+        this.globalService.addClaudeTokenCount(tokenCounts, outputTokens);
         this.userService.addRequest(user._id);
         subscriber.complete();
       };
