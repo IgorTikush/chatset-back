@@ -9,6 +9,7 @@ import { TokenModule } from './token/token.module';
 import { UserModule } from './user/user.module';
 import { MessagesModule } from './messages/messages.module';
 import { GlobalModule } from './global/global.module';
+import { BillingModule } from './billing/billing.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { GlobalModule } from './global/global.module';
     AuthModule,
     MessagesModule,
     GlobalModule,
+    BillingModule,
   ],
   providers: [
     {
