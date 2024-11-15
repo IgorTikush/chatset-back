@@ -12,6 +12,7 @@ import { UserService } from '../user/user.service';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GptInterceptor } from './guards/max-input-length.guard';
 import { GlobalService } from '../global/global.service';
+import { UserRequestsGuard } from './guards/user-requests.guard';
 
 @Controller('messages')
 export class MessagesController {
@@ -23,7 +24,7 @@ export class MessagesController {
 
   @Post()
   @Sse()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), UserRequestsGuard)
   @UseInterceptors(GptInterceptor)
   async create(@Body() createMessageDto: any, @Req() req: any): Promise<any> {
     const { user, tokenCounts } = req;
@@ -54,7 +55,7 @@ export class MessagesController {
   }
 
   @Post('image')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), UserRequestsGuard)
   async getImage(@Body() createMessageDto: any, @Req() { user }: any): Promise<any> {
     if (!['dall-e-3'].includes(createMessageDto.model)) {
       console.log('throw');
@@ -69,7 +70,7 @@ export class MessagesController {
   }
 
   @Post('stability/:model')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), UserRequestsGuard)
   async getStabilityImage(
     @Body() createMessageDto: any,
     @Param('model') model: any,
@@ -99,7 +100,7 @@ export class MessagesController {
   @Post('/claude')
   @Sse()
   @UseInterceptors(GptInterceptor)
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), UserRequestsGuard)
   async createClaudeMessage(@Body() createMessageDto: any, @Req() { user, tokenCounts }: any): Promise<any> {
     console.log('received claude', createMessageDto);
     // if (!['gpt-3.5-turbo', 'gpt-4o-mini', 'gpt-4', 'gpt-4-turbo', 'gpt-4o'].includes(createMessageDto.model)) {
@@ -137,7 +138,7 @@ export class MessagesController {
 
   @Post('/google')
   @Sse()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), UserRequestsGuard)
   async createGeminiMessage(@Body() createMessageDto: any, @Req() { user }: any): Promise<any> {
     console.log('received gemini', createMessageDto);
     const apiKey = config.get('geminiKey');

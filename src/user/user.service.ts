@@ -111,6 +111,16 @@ export class UserService {
     });
   }
 
+  async updateLimits(userId: string, limits: object) {
+    return this.userModel.updateOne({
+      _id: userId,
+    }, {
+      $set: {
+        limits,
+      },
+    });
+  }
+
   findUserById(id: string, projection = {}): Promise<any> {
     return this.userModel.findOne({ _id: id }, projection).lean() as any;
   }

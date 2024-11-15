@@ -14,5 +14,6 @@ import { PlanInst } from 'src/mongo';
   ],
   controllers: [BillingController],
   providers: [BillingService],
+  exports: [BillingService],
 })
 export class BillingModule {}

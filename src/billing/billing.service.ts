@@ -20,4 +20,9 @@ export class BillingService {
     const payment = new this.paymentModel(paymentData);
     return payment.save();
   }
+
+  async isUserHasPayment(userId: string): Promise<boolean> {
+    const payment = await this.paymentModel.findOne({ userId });
+    return !!payment;
+  }
 }
