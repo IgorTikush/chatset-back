@@ -27,7 +27,12 @@ export class UserRequestsGuard implements CanActivate {
     if (!hasPayments) {
       const limits = userWithRequests.limits || { [today]: 0 };
       const isTodayLimits = Object.keys(limits)[0] === today;
-      currentLimits = Object.values(limits)[0] as number || 0;
+
+      if (isTodayLimits) {
+        currentLimits = Object.values(limits)[0] as number || 0;
+      } else {
+        currentLimits = 0;
+      }
       // if (currentLimits && (isTodayLimits && currentLimits >= 5)) {
       //   throw new ForbiddenException('Превышен лимит бесплатных запросов. Чтобы продолжить пользоваться сервисом, пожалуйста, обновите ваш план https://app.aichatset.ru/#/pricing');
       // }
