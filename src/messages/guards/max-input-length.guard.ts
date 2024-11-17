@@ -6,23 +6,24 @@ import { Observable } from 'rxjs';
 const IMAGE_TOKEN_COUNTS = {
   'low': 85,
   'high': 170,
-  'auto': 85  // default to low
+  'auto': 85,  // default to low
 };
 
 export class GptInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, handler: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
     const { body, user } = request;
-    
+
     if (user.limit && user.limit >= 10) {
       throw new ForbiddenException('Превышен лимит бесплатных запросов. Чтобы продолжить пользоваться сервисом, пожалуйста, обновите ваш план https://app.aichatset.ru/#/pricing');
     }
 
     let tokenCounts = 0;
-    
+
     body.messages = body.messages.map(message => {
       if (message.role === 'assistant') {
         message.content = '';
+
         return message;
       }
 
@@ -41,12 +42,13 @@ export class GptInterceptor implements NestInterceptor {
         // Handle regular text messages
         tokenCounts += encode(message.content).length;
       }
-      
+
       return message;
-    });
+    }).filter(message => message.content?.length > 0);
 
     request.tokenCounts = tokenCounts;
     console.log('tokenCounts', tokenCounts);
+
     return handler.handle();
   }
 }
@@ -59,7 +61,7 @@ export class ClaudeInterceptor implements NestInterceptor {
 
     body.messages = body.messages.map(message => {
       message.content = message.content.substring(0, 500);
-      
+
       // Handle content array (for messages with images)
       if (Array.isArray(message.content)) {
         message.content.forEach(content => {
@@ -79,6 +81,7 @@ export class ClaudeInterceptor implements NestInterceptor {
 
     request.tokenCounts = tokenCounts;
     console.log('tokenCounts', tokenCounts);
+
     return handler.handle();
   }
 }

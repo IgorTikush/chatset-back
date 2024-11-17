@@ -1,18 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Sse, UseGuards, Req, BadRequestException, UseInterceptors } from '@nestjs/common';
-import OpenAI from 'openai';
-import { Observable } from 'rxjs';
-import * as config from 'config';
 import Anthropic from '@anthropic-ai/sdk';
 import { encoding_for_model } from '@dqbd/tiktoken';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Sse, UseGuards, Req, BadRequestException, UseInterceptors } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import * as config from 'config';
+import OpenAI from 'openai';
+import { Observable } from 'rxjs';
 
 import { UpdateMessageDto } from './dto/update-message.dto';
-import { MessagesService } from './messages.service';
-import { AuthGuard } from '@nestjs/passport';
-import { UserService } from '../user/user.service';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GptInterceptor } from './guards/max-input-length.guard';
-import { GlobalService } from '../global/global.service';
 import { UserRequestsGuard } from './guards/user-requests.guard';
+import { MessagesService } from './messages.service';
+import { GlobalService } from '../global/global.service';
+import { UserService } from '../user/user.service';
 
 @Controller('messages')
 export class MessagesController {
@@ -35,6 +35,7 @@ export class MessagesController {
 
     const openai = new OpenAI();
     let outputTokens = 0;
+
     return new Observable((subscriber) => {
       openai.chat.completions.create({
         model: createMessageDto.model,
@@ -47,6 +48,7 @@ export class MessagesController {
           outputTokens += tokens.length;
           subscriber.next({ data: chunk });
         }
+
         this.userService.addRequest(user._id);
         this.globalService.addGptTokenCount(tokenCounts, outputTokens);
         subscriber.complete();
@@ -80,8 +82,8 @@ export class MessagesController {
     createMessageDto = JSON.parse(createMessageDto);
 
     const formData = new FormData();
-    for (let paramsKey in createMessageDto) {
-      console.log(paramsKey)
+    for (const paramsKey in createMessageDto) {
+      console.log(paramsKey);
       formData.append(paramsKey, createMessageDto[paramsKey]);
     }
 
@@ -125,10 +127,13 @@ export class MessagesController {
           if ((event as any).usage) {
             outputTokens = (event as any).usage?.output_tokens;
           }
+
           subscriber.next({ data: event });
         }
+
         this.globalService.addClaudeTokenCount(tokenCounts, outputTokens);
         this.userService.addRequest(user._id);
+        console.log('complete');
         subscriber.complete();
       };
 
