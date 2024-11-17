@@ -1,55 +1,84 @@
 import { CallHandler, ExecutionContext, ForbiddenException, NestInterceptor } from '@nestjs/common';
 import { encode } from 'gpt-tokenizer';
 import { Observable } from 'rxjs';
-// import { User } from 'src/app.service';
+
+// Constants for image tokens
+const IMAGE_TOKEN_COUNTS = {
+  'low': 85,
+  'high': 170,
+  'auto': 85  // default to low
+};
 
 export class GptInterceptor implements NestInterceptor {
- intercept(context: ExecutionContext, handler: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, handler: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
     const { body, user } = request;
+    
     if (user.limit && user.limit >= 10) {
       throw new ForbiddenException('Превышен лимит бесплатных запросов. Чтобы продолжить пользоваться сервисом, пожалуйста, обновите ваш план https://app.aichatset.ru/#/pricing');
     }
+
     let tokenCounts = 0;
-    // console.log(body);
+    
     body.messages = body.messages.map(message => {
-        // console.log(message)
-        // message.content = message.content.substring(0, 500);
-        console.log(message)
-        if (message.role === 'assistant') {
-            message.content = '';
-        }
-        const tokens = encode(message.content);
-        // if (message.role === 'user') {
-            tokenCounts += tokens.length;
-        // }
-        // tokenCounts = tokens.length;
+      if (message.role === 'assistant') {
+        message.content = '';
         return message;
+      }
+
+      // Handle content array (for messages with images)
+      if (Array.isArray(message.content)) {
+        message.content.forEach(content => {
+          if (typeof content === 'string') {
+            tokenCounts += encode(content).length;
+          } else if (content.type === 'image_url') {
+            // Add tokens for image based on detail level
+            const detail = content.image_url.detail || 'auto';
+            tokenCounts += IMAGE_TOKEN_COUNTS[detail];
+          }
+        });
+      } else {
+        // Handle regular text messages
+        tokenCounts += encode(message.content).length;
+      }
+      
+      return message;
     });
+
     request.tokenCounts = tokenCounts;
-    console.log('tokenCounst', tokenCounts);
+    console.log('tokenCounts', tokenCounts);
     return handler.handle();
- }
+  }
 }
 
 export class ClaudeInterceptor implements NestInterceptor {
-    intercept(context: ExecutionContext, handler: CallHandler): Observable<any> {
-       const request = context.switchToHttp().getRequest();
-       const { body } = request;
-       let tokenCounts = 0;
-       console.log(body);
-       body.messages = body.messages.map(message => {
-           console.log(message)
-           message.content = message.content.substring(0, 500);
-           const tokens = encode(message.content);
-           // if (message.role === 'user') {
-               tokenCounts += tokens.length;
-           // }
-           // tokenCounts = tokens.length;
-           return message;
-       });
-       request.tokenCounts = tokenCounts;
-       console.log('tokenCounst', tokenCounts);
-       return handler.handle();
-    }
-   }
+  intercept(context: ExecutionContext, handler: CallHandler): Observable<any> {
+    const request = context.switchToHttp().getRequest();
+    const { body } = request;
+    let tokenCounts = 0;
+
+    body.messages = body.messages.map(message => {
+      message.content = message.content.substring(0, 500);
+      
+      // Handle content array (for messages with images)
+      if (Array.isArray(message.content)) {
+        message.content.forEach(content => {
+          if (typeof content === 'string') {
+            tokenCounts += encode(content).length;
+          } else if (content.type === 'image_url') {
+            // Claude has different image handling, adjust token count as needed
+            tokenCounts += 85; // Placeholder value, adjust based on Claude's specifications
+          }
+        });
+      } else {
+        tokenCounts += encode(message.content).length;
+      }
+
+      return message;
+    });
+
+    request.tokenCounts = tokenCounts;
+    console.log('tokenCounts', tokenCounts);
+    return handler.handle();
+  }
+}
