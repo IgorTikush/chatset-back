@@ -5,7 +5,6 @@ import { Observable } from 'rxjs';
 
 export class GptInterceptor implements NestInterceptor {
  intercept(context: ExecutionContext, handler: CallHandler): Observable<any> {
-    // throw new ForbiddenException('У вас исчерпан лимит запросов в день. Чтобы продолжить пользоваться сервисом, пожалуйста, обновите ваш план https://aichatset.ru/#/pricing');
     const request = context.switchToHttp().getRequest();
     const { body, user } = request;
     if (user.limit && user.limit >= 10) {
@@ -15,7 +14,11 @@ export class GptInterceptor implements NestInterceptor {
     // console.log(body);
     body.messages = body.messages.map(message => {
         // console.log(message)
-        message.content = message.content.substring(0, 500);
+        // message.content = message.content.substring(0, 500);
+        console.log(message)
+        if (message.role === 'assistant') {
+            message.content = '';
+        }
         const tokens = encode(message.content);
         // if (message.role === 'user') {
             tokenCounts += tokens.length;
