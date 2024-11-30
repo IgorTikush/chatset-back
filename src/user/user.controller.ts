@@ -1,13 +1,19 @@
-import { Controller, Post, Body, UseGuards, Req, Get } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Get, UseInterceptors, ClassSerializerInterceptor } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
+import { UserResponseDTO } from './dto/user-response.dto';
 import { UserTokensDTO } from './dto/user-tokens.dto';
 import { UserService } from './user.service';
 import { CreateUserValidation } from './validations/create-user-validations';
+import { BillingService } from '../billing/billing.service';
 
 @Controller('user')
+  @UseInterceptors(ClassSerializerInterceptor)
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly billingService: BillingService,
+  ) {}
 
   @Post()
   async create(@Body() userInfo: CreateUserValidation): Promise<UserTokensDTO> {
@@ -27,8 +33,14 @@ export class UserController {
 
   @Get()
   @UseGuards(AuthGuard('jwt'))
-  // TO DO: прописать DTO
-  async getUser(@Req() { user }) {
-    return this.userService.findUserById(user._id);
+  async getUser(@Req() { user }): Promise<UserResponseDTO> {
+    const userActivePayment = await this.billingService.getLastActiveUserPayment(user._id);
+    const userDoc = await this.userService.findUserById(user._id);
+    console.log(userActivePayment);
+
+    return new UserResponseDTO({
+      ...userDoc,
+      lastPayment: userActivePayment,
+    });
   }
 }
