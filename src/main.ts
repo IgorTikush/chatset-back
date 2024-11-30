@@ -1,17 +1,18 @@
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
+import { ExpressAdapter, NestExpressApplication } from '@nestjs/platform-express';
 import * as bodyParser from 'body-parser';
 import * as compression from 'compression';
+import * as express from 'express';
 import helmet from 'helmet';
 import * as logger from 'morgan';
 
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestFastifyApplication>(
+  const app = await NestFactory.create<NestExpressApplication>(
     AppModule,
-    new FastifyAdapter(),
+    new ExpressAdapter(),
   );
 
   app.enableCors({
@@ -25,6 +26,7 @@ async function bootstrap() {
   app.use(compression());
   app.use(helmet());
   app.use(bodyParser.urlencoded({ limit: '24mb', extended: true, parameterLimit: 100000 }));
+  app.use(express.urlencoded({ extended: true }));
 
   app.enableShutdownHooks();
   app.useGlobalPipes(
