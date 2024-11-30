@@ -9,15 +9,15 @@ import { BankWebhookEvent } from './types/bank-webhook-event';
 export class BillingController {
   constructor(private readonly billingService: BillingService) {}
 
-  @Get('payments')
-  @UseGuards(AuthGuard('jwt'))
-  async getUserPayments(@Req() { user }) {
-    const userId = user._id;
+  // @Get('payments')
+  // @UseGuards(AuthGuard('jwt'))
+  // async getUserPayments(@Req() { user }) {
+  //   const userId = user._id;
 
-    const payments = await this.billingService.getPaymentsByUser(userId);
+  //   const payments = await this.billingService.getPaymentsByUser(userId);
 
-    return { payments };
-  }
+  //   return { payments };
+  // }
 
   @Post('webhook')
   @Header('Content-Type', 'application/x-www-form-urlencoded')
