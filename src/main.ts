@@ -26,7 +26,7 @@ async function bootstrap() {
   app.use(compression());
   app.use(helmet());
   app.use(bodyParser.urlencoded({ limit: '24mb', extended: true, parameterLimit: 100000 }));
-  app.use(express.urlencoded({ extended: true }));
+  // app.use(express.urlencoded({ extended: true }));
 
   app.enableShutdownHooks();
   app.useGlobalPipes(
