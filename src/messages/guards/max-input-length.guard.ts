@@ -14,7 +14,7 @@ export class GptInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
     const { body, user } = request;
 
-    if (user.limit && user.limit >= 10) {
+    if (user.limit && user.limit >= 5) {
       throw new ForbiddenException('Превышен лимит бесплатных запросов. Чтобы продолжить пользоваться сервисом, пожалуйста, обновите ваш план https://app.aichatset.ru/#/pricing');
     }
 
