@@ -23,8 +23,11 @@ export class Payment {
   @Prop()
   planName: string;
 
+  @Prop()
+  expiresIn: Date;
+
   @Prop({ type: Object })
   metadata?: Record<string, unknown>;
 }
 
-export const PaymentSchema = SchemaFactory.createForClass(Payment); 
+export const PaymentSchema = SchemaFactory.createForClass(Payment);

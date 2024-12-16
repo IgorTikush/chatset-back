@@ -25,7 +25,7 @@ export class BillingService {
   }
 
   async isUserHasPayment(userId: string): Promise<boolean> {
-    const payment = await this.paymentModel.findOne({ userId });
+    const payment = await this.paymentModel.findOne({ userId, expiresIn: { $gt: new Date() } });
 
     return !!payment;
   }
