@@ -1,24 +1,26 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
-import { UserService } from '../../user/user.service';
 import { BillingService } from 'src/billing/billing.service';
+
+import { UserService } from '../../user/user.service';
 
 @Injectable()
 export class UserRequestsGuard implements CanActivate {
   constructor(
     private readonly userService: UserService,
     private readonly billingService: BillingService,
-) {}
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const user = request.user;
+    const { user } = request;
 
     const userWithRequests = await this.userService.findUserById(user._id);
     const today = new Date().toLocaleDateString('ru-RU', {
       day: '2-digit',
-      month: '2-digit', 
-      year: 'numeric'
+      month: '2-digit',
+      year: 'numeric',
     }).split('.').join('-');
+
     // console.log('today', today);
     // Check if user has any payments
     const hasPayments = await this.billingService.isUserHasPayment(user._id);
@@ -37,11 +39,12 @@ export class UserRequestsGuard implements CanActivate {
       //   throw new ForbiddenException('Превышен лимит бесплатных запросов. Чтобы продолжить пользоваться сервисом, пожалуйста, обновите ваш план https://app.aichatset.ru/#/pricing');
       // }
     }
+
     request.user.limit = currentLimits;
     await this.userService.updateLimits(user._id, {
-      [today]: currentLimits + 1
+      [today]: currentLimits + 1,
     });
-    
+
     return true;
   }
-} 
+}
