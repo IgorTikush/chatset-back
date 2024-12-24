@@ -39,43 +39,43 @@ export class BillingService {
   }
 
   async cancelSubscription(userId: string) {
-    const username = config.get('cloudpayments.username');
-    const password = config.get('cloudpayments.password');
-    const credentials = Buffer.from(`${username}:${password}`).toString('base64');
-    console.log(userId);
-    const subscription = await fetch('https://api.cloudpayments.ru/subscriptions/find', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${credentials}`,
-      },
-      body: JSON.stringify({
-        accountId: userId.toString(),
-      }),
-    }).then(res => res.json());
+    // const username = config.get('cloudpayments.username');
+    // const password = config.get('cloudpayments.password');
+    // const credentials = Buffer.from(`${username}:${password}`).toString('base64');
+    // console.log(userId);
+    // const subscription = await fetch('https://api.cloudpayments.ru/subscriptions/find', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'Authorization': `Basic ${credentials}`,
+    //   },
+    //   body: JSON.stringify({
+    //     accountId: userId.toString(),
+    //   }),
+    // }).then(res => res.json());
 
-    console.log(subscription);
-    if (!subscription.Model[0]) {
-      throw new NotFoundException('Subscription not found');
-    }
+    // console.log(subscription);
+    // if (!subscription.Model[0]) {
+    //   throw new NotFoundException('Subscription not found');
+    // }
 
-    const subscriptionId = subscription.Model[0].Id;
+    // const subscriptionId = subscription.Model[0].Id;
 
-    this.paymentModel.updateOne(
+    await this.paymentModel.updateOne(
       { userId, expiresIn: { $gt: new Date() } },
       { canceled: true },
-    );
+    ).then(res => console.log(res));
 
-    const res = await fetch('https://api.cloudpayments.ru/subscriptions/cancel', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${credentials}`,
-      },
-      body: JSON.stringify({
-        Id: subscriptionId,
-      }),
-    }).then(res2 => res2.json());
+    // const res = await fetch('https://api.cloudpayments.ru/subscriptions/cancel', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'Authorization': `Basic ${credentials}`,
+    //   },
+    //   body: JSON.stringify({
+    //     Id: subscriptionId,
+    //   }),
+    // }).then(res2 => res2.json());
 
     // await this.paymentModel.deleteMany({ userId });
   }
