@@ -41,7 +41,8 @@ export class BillingService {
   async cancelSubscription(userId: string) {
     const username = config.get('cloudpayments.username');
     const password = config.get('cloudpayments.password');
-    const credentials = Buffer.from(`${username}:${password}`).toString('base64');
+    const credentials = Buffer.from(`${username}:::${password}`).toString('base64');
+    console.log(userId);
     const subscription = await fetch('https://api.cloudpayments.ru/subscriptions/find', {
       method: 'POST',
       headers: {
