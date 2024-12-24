@@ -49,7 +49,7 @@ export class BillingService {
         'Authorization': `Basic ${credentials}`,
       },
       body: JSON.stringify({
-        accountId: userId,
+        accountId: userId.toString(),
       }),
     }).then(res => res.json());
 
