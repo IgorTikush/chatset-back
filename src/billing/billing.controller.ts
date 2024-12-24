@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Get, Req, Header } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Req, Header, Delete } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 import { BillingService } from './billing.service';
@@ -45,5 +45,13 @@ export class BillingController {
     });
 
     return { code: 0 };
+  }
+
+  @Delete('subscription')
+  @UseGuards(AuthGuard('jwt'))
+  async cancelSubscription(@Req() { user }) {
+    const userId = user._id;
+
+    await this.billingService.cancelSubscription(userId);
   }
 }
