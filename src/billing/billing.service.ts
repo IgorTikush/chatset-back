@@ -53,6 +53,7 @@ export class BillingService {
       }),
     }).then(res => res.json());
 
+    console.log(subscription);
     if (!subscription.Model[0]) {
       throw new NotFoundException('Subscription not found');
     }
