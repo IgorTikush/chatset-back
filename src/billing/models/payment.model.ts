@@ -24,6 +24,8 @@ export class Payment {
   planName: string;
 
   @Prop()
+  canceled: boolean;
+  @Prop()
   expiresIn: Date;
 
   @Prop({ type: Object })
