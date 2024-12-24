@@ -25,6 +25,7 @@ export class Payment {
 
   @Prop()
   canceled: boolean;
+
   @Prop()
   expiresIn: Date;
 
