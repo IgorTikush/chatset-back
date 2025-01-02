@@ -28,7 +28,7 @@ export class MessagesController {
   @UseInterceptors(GptInterceptor)
   async create(@Body() createMessageDto: any, @Req() req: any): Promise<any> {
     const { user, tokenCounts } = req;
-    if (!['gpt-4o-mini', 'gpt-4o'].includes(createMessageDto.model)) {
+    if (!['GPT 4o-mini', 'GPT 4o'].includes(createMessageDto.model)) {
       console.log('throw');
       throw new BadRequestException('модель не поддерживается');
     }
@@ -105,10 +105,11 @@ export class MessagesController {
   @UseGuards(AuthGuard('jwt'), UserRequestsGuard)
   async createClaudeMessage(@Body() createMessageDto: any, @Req() { user, tokenCounts }: any): Promise<any> {
     console.log('received claude', createMessageDto);
-    // if (!['gpt-3.5-turbo', 'gpt-4o-mini', 'gpt-4', 'gpt-4-turbo', 'gpt-4o'].includes(createMessageDto.model)) {
-    //   console.log('throw');
-    //   throw new BadRequestException('модель не поддерживается');
-    // }
+    if (!['Claude 3.5 Sonnet'].includes(createMessageDto.model)) {
+      console.log('throw');
+      throw new BadRequestException('модель не поддерживается');
+    }
+
     const client = new Anthropic();
 
     // await this.userService.addRequest(user._id).catch(console.log);
