@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { encoding_for_model } from '@dqbd/tiktoken';
+import { encoding_for_model, TiktokenModel } from '@dqbd/tiktoken';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Controller, Get, Post, Body, Patch, Param, Delete, Sse, UseGuards, Req, BadRequestException, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -36,13 +36,19 @@ export class MessagesController {
     const openai = new OpenAI();
     let outputTokens = 0;
 
+    let modelName = 'gpt-4o-mini';
+
+    if (createMessageDto.model === 'GPT 4o') {
+      modelName = 'gpt-4o';
+    }
+
     return new Observable((subscriber) => {
       openai.chat.completions.create({
-        model: createMessageDto.model,
+        model: modelName,
         messages: createMessageDto.messages,
         stream: true,
       }).then(async (stream) => {
-        const enc = encoding_for_model(createMessageDto.model);
+        const enc = encoding_for_model(modelName as TiktokenModel);
         for await (const chunk of stream) {
           const tokens = enc.encode(chunk.choices[0]?.delta?.content || '');
           outputTokens += tokens.length;
