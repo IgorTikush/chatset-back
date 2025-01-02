@@ -65,16 +65,22 @@ export class MessagesController {
   @Post('image')
   @UseGuards(AuthGuard('jwt'), UserRequestsGuard)
   async getImage(@Body() createMessageDto: any, @Req() { user }: any): Promise<any> {
-    if (!['dall-e-3'].includes(createMessageDto.model)) {
+    if (!['DALL-E 3'].includes(createMessageDto.model)) {
       console.log('throw');
       throw new BadRequestException('модель не поддерживается');
     }
+
+    const modelName = 'dall-e-3';
 
     const openai = new OpenAI();
 
     await this.userService.addRequest(user._id).catch(console.log);
 
-    return openai.images.generate(createMessageDto);
+    return openai.images.generate({
+      model: modelName,
+      prompt: createMessageDto.prompt,
+      size: createMessageDto.size,
+    });
   }
 
   @Post('stability/:model')
@@ -155,6 +161,8 @@ export class MessagesController {
   @UseGuards(AuthGuard('jwt'), UserRequestsGuard)
   async createGeminiMessage(@Body() createMessageDto: any, @Req() { user }: any): Promise<any> {
     console.log('received gemini', createMessageDto);
+    const modelName = 'gemini-1.5-pro';
+    createMessageDto.model = modelName;
     const apiKey = config.get('geminiKey');
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
