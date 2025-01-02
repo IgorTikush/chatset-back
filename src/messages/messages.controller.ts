@@ -118,11 +118,13 @@ export class MessagesController {
 
     const client = new Anthropic();
 
+    const modelName = 'claude-3-5-sonnet-20240620';
+
     // await this.userService.addRequest(user._id).catch(console.log);
 
     return new Observable((subscriber) => {
       const stream = client.messages.stream({
-        model: createMessageDto.model,
+        model: modelName,
         messages: createMessageDto.messages,
         max_tokens: createMessageDto.max_tokens,
         // stream: true,
