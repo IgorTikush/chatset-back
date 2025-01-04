@@ -33,7 +33,10 @@ export class MessagesController {
       throw new BadRequestException('модель не поддерживается');
     }
 
-    const openai = new OpenAI();
+    const openai = new OpenAI({
+      apiKey: config.get('openaiKey'),
+    });
+
     let outputTokens = 0;
 
     let modelName = 'gpt-4o-mini';
@@ -72,7 +75,9 @@ export class MessagesController {
 
     const modelName = 'dall-e-3';
 
-    const openai = new OpenAI();
+    const openai = new OpenAI({
+      apiKey: config.get('openaiKey'),
+    });
 
     await this.userService.addRequest(user._id).catch(console.log);
 
