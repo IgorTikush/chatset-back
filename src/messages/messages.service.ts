@@ -1,27 +1,24 @@
 import { Injectable } from '@nestjs/common';
-
-import { CreateMessageDto } from './dto/create-message.dto';
-import { UpdateMessageDto } from './dto/update-message.dto';
+import * as config from 'config';
+import { OpenAI } from 'openai';
 
 @Injectable()
 export class MessagesService {
-  create(createMessageDto: CreateMessageDto) {
-    return 'ты кто такой? пошел нахуй';
+  sendMessageToOpenAi(message: string) {
+    return message;
   }
 
-  findAll() {
-    return `This action returns all messages`;
-  }
+  async translateMessage(message: string) {
+    const openai = new OpenAI({
+      apiKey: config.get('openaiKey'),
+    });
 
-  findOne(id: number) {
-    return `This action returns a #${id} message`;
-  }
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [{ role: 'user', content: 'Return only translation. Translate the following message to English: ' + message }],
+      stream: false,
+    });
 
-  update(id: number, updateMessageDto: UpdateMessageDto) {
-    return `This action updates a #${id} message`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} message`;
+    return response.choices[0].message.content;
   }
 }

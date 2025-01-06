@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { encoding_for_model, TiktokenModel } from '@dqbd/tiktoken';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { Controller, Get, Post, Body, Patch, Param, Delete, Sse, UseGuards, Req, BadRequestException, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Sse, UseGuards, Req, BadRequestException, UseInterceptors, Header } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import * as config from 'config';
 import OpenAI from 'openai';
@@ -93,14 +93,17 @@ export class MessagesController {
   async getStabilityImage(
     @Body() createMessageDto: any,
     @Param('model') model: any,
-    @Req() { user }: any,
   ): Promise<any> {
-    console.log('model', model);
-    createMessageDto = JSON.parse(createMessageDto);
+    const translatedMessage = await this.messagesService.translateMessage(createMessageDto.prompt);
 
     const formData = new FormData();
     for (const paramsKey in createMessageDto) {
       console.log(paramsKey);
+      if (paramsKey === 'prompt') {
+        formData.append(paramsKey, translatedMessage);
+        continue;
+      }
+
       formData.append(paramsKey, createMessageDto[paramsKey]);
     }
 
@@ -113,7 +116,9 @@ export class MessagesController {
       body: formData,
     });
 
-    return res.json();
+    const resJson = await res.json();
+
+    return resJson;
   }
 
   @Post('/claude')
@@ -193,26 +198,6 @@ export class MessagesController {
 
       processStream();
     });
-  }
-
-  @Get()
-  findAll() {
-    return this.messagesService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.messagesService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMessageDto: UpdateMessageDto) {
-    return this.messagesService.update(+id, updateMessageDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.messagesService.remove(+id);
   }
 }
 
