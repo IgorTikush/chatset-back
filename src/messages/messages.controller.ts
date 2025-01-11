@@ -1,15 +1,14 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { encoding_for_model, TiktokenModel } from '@dqbd/tiktoken';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { Controller, Get, Post, Body, Patch, Param, Delete, Sse, UseGuards, Req, BadRequestException, UseInterceptors, Header } from '@nestjs/common';
+import { Controller, Post, Body, Param, Sse, UseGuards, Req, BadRequestException, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import * as config from 'config';
 import OpenAI from 'openai';
 import { Observable } from 'rxjs';
 
-import { UpdateMessageDto } from './dto/update-message.dto';
 import { GptInterceptor } from './guards/max-input-length.guard';
-import { UserRequestsGuard } from './guards/user-requests.guard';
+import { PaymentAndLimitsGuard } from './guards/payments-and-limits.guard';
 import { MessagesService } from './messages.service';
 import { GlobalService } from '../global/global.service';
 import { UserService } from '../user/user.service';
@@ -24,7 +23,7 @@ export class MessagesController {
 
   @Post()
   @Sse()
-  @UseGuards(AuthGuard('jwt'), UserRequestsGuard)
+  @UseGuards(AuthGuard('jwt'), PaymentAndLimitsGuard)
   @UseInterceptors(GptInterceptor)
   async create(@Body() createMessageDto: any, @Req() req: any): Promise<any> {
     const { user, tokenCounts } = req;
@@ -66,7 +65,7 @@ export class MessagesController {
   }
 
   @Post('image')
-  @UseGuards(AuthGuard('jwt'), UserRequestsGuard)
+  @UseGuards(AuthGuard('jwt'), PaymentAndLimitsGuard)
   async getImage(@Body() createMessageDto: any, @Req() { user }: any): Promise<any> {
     if (!['DALL-E 3'].includes(createMessageDto.model)) {
       console.log('throw');
@@ -89,7 +88,7 @@ export class MessagesController {
   }
 
   @Post('stability/:model')
-  @UseGuards(AuthGuard('jwt'), UserRequestsGuard)
+  @UseGuards(AuthGuard('jwt'), PaymentAndLimitsGuard)
   async getStabilityImage(
     @Body() createMessageDto: any,
     @Param('model') model: any,
@@ -124,7 +123,7 @@ export class MessagesController {
   @Post('/claude')
   @Sse()
   @UseInterceptors(GptInterceptor)
-  @UseGuards(AuthGuard('jwt'), UserRequestsGuard)
+  @UseGuards(AuthGuard('jwt'), PaymentAndLimitsGuard)
   async createClaudeMessage(@Body() createMessageDto: any, @Req() { user, tokenCounts }: any): Promise<any> {
     console.log('received claude', createMessageDto);
     if (!['Claude 3.5 Sonnet'].includes(createMessageDto.model)) {
@@ -168,7 +167,7 @@ export class MessagesController {
 
   @Post('/google')
   @Sse()
-  @UseGuards(AuthGuard('jwt'), UserRequestsGuard)
+  @UseGuards(AuthGuard('jwt'), PaymentAndLimitsGuard)
   async createGeminiMessage(@Body() createMessageDto: any, @Req() { user }: any): Promise<any> {
     console.log('received gemini', createMessageDto);
     const modelName = 'gemini-1.5-pro';

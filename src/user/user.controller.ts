@@ -5,6 +5,7 @@ import { UserResponseDTO } from './dto/user-response.dto';
 import { UserTokensDTO } from './dto/user-tokens.dto';
 import { UserService } from './user.service';
 import { CreateUserValidation } from './validations/create-user-validations';
+import { UserLoginGuard } from '../auth/guards/login.guard';
 import { BillingService } from '../billing/billing.service';
 
 @Controller('user')
@@ -23,7 +24,7 @@ export class UserController {
   }
 
   @Post('login')
-  @UseGuards(AuthGuard('local'))
+  @UseGuards(UserLoginGuard)
   async login(@Req() req): Promise<UserTokensDTO> {
     const userId = req.user._id;
     const userTokens = await this.userService.getTokens({ userId });

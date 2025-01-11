@@ -267,7 +267,7 @@
     ],
     "max-len": [
       "warn",
-      150
+      200
     ],
     "import/order": [
       "warn",

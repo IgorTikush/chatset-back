@@ -2,9 +2,10 @@ import { Module } from '@nestjs/common';
 
 import { MessagesController } from './messages.controller';
 import { MessagesService } from './messages.service';
-import { UserModule } from '../user/user.module';
-import { GlobalModule } from '../global/global.module';
 import { BillingModule } from '../billing/billing.module';
+import { GlobalModule } from '../global/global.module';
+import { LimitModule } from '../limit/limit.module';
+import { UserModule } from '../user/user.module';
 
 @Module({
   controllers: [MessagesController],
@@ -13,6 +14,7 @@ import { BillingModule } from '../billing/billing.module';
     UserModule,
     GlobalModule,
     BillingModule,
+    LimitModule,
   ],
 })
 export class MessagesModule {}
