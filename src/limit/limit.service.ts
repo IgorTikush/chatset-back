@@ -6,6 +6,38 @@ import { PlanService } from '../plan/plan.service';
 
 @Injectable()
 export class LimitService {
+  private readonly modelsAmplification = {
+    input: {
+      'gpt-4o': 0.25,
+      'claude-3-5-sonnet-20240620': 1.17,
+    },
+    output: {
+      'gpt-4o': 1,
+      'claude-3-5-sonnet-20240620': 1.5,
+    },
+  };
+
+  private readonly modelsAmplificationForDalle = {
+    'hd': {
+      '1024x1024': 16000,
+      '1792x1024': 24000,
+      '1024x1792': 24000,
+    },
+    'standard': {
+      '1024x1024': 8000,
+      '1792x1024': 16000,
+      '1024x1792': 16000,
+    },
+  };
+
+  private readonly modelsAmplificationForStableDiffusion = {
+    'ultra': 16000,
+    'core': 6000,
+    'sd3-medium': 7000,
+    'sd3-large': 13000,
+    'sd3-large-turbo': 8000,
+  };
+
   constructor(
     private readonly planService: PlanService,
     private readonly limitRepository: LimitRepository,
@@ -28,26 +60,27 @@ export class LimitService {
     return limit;
   }
 
-  // async getLimitByUserId(userId: string): Promise<Limit> {
-  //   const limit = await this.limitModel.findOne({ userId });
-  //   if (!limit) {
-  //     throw new NotFoundException('Limit not found');
-  //   }
+  async addUsedTokens({ inputTokens, outputTokens, userId, model }: { inputTokens: number; outputTokens: number; userId: string; model: string }): Promise<void> {
+    const chatsetTokens = this.countChatSetTokensForText(model, inputTokens, outputTokens);
 
-  //   return limit;
-  // }
+    await this.limitRepository.addUsedTokens(chatsetTokens, userId);
+  }
 
-  // async updateLimit(userId: string, maxLimit: number): Promise<Limit> {
-  //   const limit = await this.limitModel.findOneAndUpdate(
-  //     { userId },
-  //     { maxLimit },
-  //     { new: true },
-  //   );
+  countChatSetTokensForText(model: string, inputTokens: number, outputTokens: number): number {
+    const chatsetInputTokens = inputTokens * this.modelsAmplification.input[model];
+    const chatsetOutputTokens = outputTokens * this.modelsAmplification.output[model];
+    const totalChatsetTokens = chatsetInputTokens + chatsetOutputTokens;
 
-  //   if (!limit) {
-  //     throw new NotFoundException('Limit not found');
-  //   }
+    return totalChatsetTokens;
+  }
 
-  //   return limit;
-  // }
+  async addUsedTokensForImage(userId: string, resolution: string, quality: string): Promise<void> {
+    const chatsetTokens = this.modelsAmplificationForDalle[quality][resolution];
+    await this.limitRepository.addUsedTokens(chatsetTokens, userId);
+  }
+
+  async addUsedTokensForStableDiffusion(userId: string, model: string): Promise<void> {
+    const chatsetTokens = this.modelsAmplificationForStableDiffusion[model];
+    await this.limitRepository.addUsedTokens(chatsetTokens, userId);
+  }
 }

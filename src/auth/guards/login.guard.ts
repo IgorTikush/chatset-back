@@ -11,6 +11,7 @@ export class UserLoginGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
+
     const { email, password } = request.body;
 
     const user: IUserAuth = await this.authService.validateUser(email, password);

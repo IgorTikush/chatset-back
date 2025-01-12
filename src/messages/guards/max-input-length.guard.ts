@@ -14,10 +14,6 @@ export class GptInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
     const { body, user } = request;
 
-    if (user.limit && user.limit >= 5) {
-      throw new ForbiddenException('Превышен лимит бесплатных запросов. Чтобы продолжить пользоваться сервисом, пожалуйста, обновите ваш план https://app.aichatset.ru/#/pricing');
-    }
-
     let tokenCounts = 0;
 
     body.messages = body.messages.map(message => {
@@ -34,8 +30,8 @@ export class GptInterceptor implements NestInterceptor {
             tokenCounts += encode(content).length;
           } else if (content.type === 'image_url') {
             // Add tokens for image based on detail level
-            const detail = content.image_url.detail || 'auto';
-            tokenCounts += IMAGE_TOKEN_COUNTS[detail];
+            // const detail = content.image_url.detail || 'auto';
+            tokenCounts += 800;
           }
         });
       } else {

@@ -30,4 +30,11 @@ export class LimitRepository {
       { new: true },
     );
   }
+
+  async addUsedTokens(chatsetTokens: number, userId: string): Promise<Limit | null> {
+    return this.limitModel.findOneAndUpdate(
+      { userId },
+      { $inc: { usedTokens: chatsetTokens } },
+    );
+  }
 }
