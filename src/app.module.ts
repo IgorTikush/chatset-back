@@ -5,11 +5,13 @@ import * as config from 'config';
 import { MorganInterceptor, MorganModule } from 'nest-morgan';
 
 import { AuthModule } from './auth/auth.module';
+import { BillingModule } from './billing/billing.module';
+import { GlobalModule } from './global/global.module';
+import { LimitModule } from './limit/limit.module';
+import { MessagesModule } from './messages/messages.module';
+import { PlanModule } from './plan/plan.module';
 import { TokenModule } from './token/token.module';
 import { UserModule } from './user/user.module';
-import { MessagesModule } from './messages/messages.module';
-import { GlobalModule } from './global/global.module';
-import { BillingModule } from './billing/billing.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { BillingModule } from './billing/billing.module';
     MessagesModule,
     GlobalModule,
     BillingModule,
+    LimitModule,
+    PlanModule,
   ],
   providers: [
     {

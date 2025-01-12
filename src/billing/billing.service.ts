@@ -1,24 +1,26 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as config from 'config';
 import { Model } from 'mongoose';
 
 import { Payment, PaymentDocument } from './models/payment.model';
+import { LimitService } from '../limit/limit.service';
+import { PlanService } from '../plan/plan.service';
 
 @Injectable()
 export class BillingService {
   constructor(
-    @InjectModel('Plan') private readonly planModel: Model<{name: string; price: number}>,
+    private readonly planService: PlanService,
     @InjectModel(Payment.name) private paymentModel: Model<PaymentDocument>,
+    private readonly limitService: LimitService,
   ) {}
 
   async getPlan(price: number) {
-    const plan = await this.planModel.findOne({ price });
-
-    return plan;
+    return this.planService.getPlanByPrice(price);
   }
 
   async processPayment(paymentData: Partial<Payment>): Promise<Payment> {
+    await this.limitService.createLimit(paymentData.userId, paymentData.planId, paymentData.expiresIn);
     const payment = new this.paymentModel(paymentData);
 
     return payment.save();
