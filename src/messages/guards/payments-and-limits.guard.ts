@@ -1,11 +1,13 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 
 import { LimitService } from '../../limit/limit.service';
+import { UserService } from '../../user/user.service';
 
 @Injectable()
 export class PaymentAndLimitsGuard implements CanActivate {
   constructor(
     private readonly limitService: LimitService,
+    private readonly userService: UserService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -46,6 +48,10 @@ export class PaymentAndLimitsGuard implements CanActivate {
           'Превышен лимит бесплатных запросов.Чтобы продолжить пользоваться сервисом, пожалуйста, обновите ваш план https://app.aichatset.ru/#/pricing',
         );
       }
+
+      await this.userService.updateLimits(user._id, {
+        [today]: currentLimits + 1,
+      });
 
       return true;
     }
