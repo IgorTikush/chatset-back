@@ -1,6 +1,6 @@
-import { Exclude, Expose, Transform, Type } from 'class-transformer';
+import { Exclude, Expose, Transform } from 'class-transformer';
 
-import { Payment } from '../../billing/models/payment.model';
+import { Limit } from '../../limit/models/limit.model';
 
 @Exclude()
 export class UserResponseDTO {
@@ -15,8 +15,7 @@ export class UserResponseDTO {
   name?: string;
 
   @Expose()
-  // @Type(() => Payment)
-  lastPayment?: Payment;
+  limits?: Limit;
 
   @Expose()
   createdAt: Date;

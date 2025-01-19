@@ -79,6 +79,6 @@ export class BillingService {
       }),
     }).then(res2 => res2.json());
 
-    await this.paymentModel.deleteMany({ userId });
+    await this.limitService.cancelSubscription(userId);
   }
 }

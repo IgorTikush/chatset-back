@@ -49,6 +49,7 @@ export class LimitService {
     const limit = await this.limitRepository.create(userId, {
       tokens: plan?.tokens,
       expiresIn: paymentExpires,
+      planName: plan?.name,
     });
 
     return limit;
@@ -82,5 +83,9 @@ export class LimitService {
   async addUsedTokensForStableDiffusion(userId: string, model: string): Promise<void> {
     const chatsetTokens = this.modelsAmplificationForStableDiffusion[model];
     await this.limitRepository.addUsedTokens(chatsetTokens, userId);
+  }
+
+  async cancelSubscription(userId: string): Promise<void> {
+    await this.limitRepository.cancelSubscription(userId);
   }
 }

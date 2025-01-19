@@ -7,6 +7,7 @@ import { UserService } from './user.service';
 import { CreateUserValidation } from './validations/create-user-validations';
 import { UserLoginGuard } from '../auth/guards/login.guard';
 import { BillingService } from '../billing/billing.service';
+import { LimitService } from '../limit/limit.service';
 
 @Controller('user')
   @UseInterceptors(ClassSerializerInterceptor)
@@ -14,6 +15,7 @@ export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly billingService: BillingService,
+    private readonly limitService: LimitService,
   ) {}
 
   @Post()
@@ -35,13 +37,12 @@ export class UserController {
   @Get()
   @UseGuards(AuthGuard('jwt'))
   async getUser(@Req() { user }): Promise<UserResponseDTO> {
-    const userActivePayment = await this.billingService.getLastActiveUserPayment(user._id);
+    const userLimits = await this.limitService.getLimits(user._id);
     const userDoc = await this.userService.findUserById(user._id);
-    console.log(userActivePayment);
 
     return new UserResponseDTO({
       ...userDoc,
-      lastPayment: userActivePayment,
+      limits: userLimits,
     });
   }
 }

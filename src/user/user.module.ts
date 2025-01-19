@@ -6,6 +6,7 @@ import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { AuthModule } from '../auth/auth.module';
 import { BillingModule } from '../billing/billing.module';
+import { LimitModule } from '../limit/limit.module';
 import { UserInst } from '../mongo';
 import { TokenModule } from '../token/token.module';
 
@@ -17,6 +18,7 @@ import { TokenModule } from '../token/token.module';
     JwtModule.register({ secret: config.get('jwtAccessSecret') }),
     BillingModule,
     AuthModule,
+    LimitModule,
   ],
   controllers: [UserController],
   providers: [UserService],

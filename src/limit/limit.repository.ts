@@ -8,7 +8,7 @@ import { Limit } from './models/limit.model';
 export class LimitRepository {
   constructor(@InjectModel(Limit.name) private limitModel: Model<Limit>) {}
 
-  async create(userId: string, limitParams: { tokens: number; expiresIn: Date }): Promise<Limit> {
+  async create(userId: string, limitParams: { tokens: number; expiresIn: Date; planName: string }): Promise<Limit> {
     const newLimit = new this.limitModel({
       userId,
       availableTokens: limitParams.tokens,
@@ -35,6 +35,14 @@ export class LimitRepository {
     return this.limitModel.findOneAndUpdate(
       { userId },
       { $inc: { usedTokens: chatsetTokens } },
+    );
+  }
+
+  async cancelSubscription(userId: string): Promise<void> {
+    await this.limitModel.findOneAndUpdate(
+      { userId },
+      { $set: { canceled: true } },
+      { sort: { createdAt: -1 } },
     );
   }
 }
