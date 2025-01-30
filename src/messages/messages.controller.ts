@@ -47,6 +47,13 @@ export class MessagesController {
       modelName = 'gpt-4o';
     }
 
+    await this.messagesService.createMessage({
+      userId: user._id,
+      role: 'user',
+      content: createMessageDto.messages[createMessageDto.messages.length - 1].content,
+      model: modelName,
+    });
+
     return new Observable((subscriber) => {
       openai.chat.completions.create({
         model: modelName,

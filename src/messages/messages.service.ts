@@ -2,8 +2,13 @@ import { Injectable } from '@nestjs/common';
 import * as config from 'config';
 import { OpenAI } from 'openai';
 
+import { MessagesRepository } from './messages.repository';
+import { Message } from './models/message.model';
+
 @Injectable()
 export class MessagesService {
+  constructor(private readonly messagesRepository: MessagesRepository) {}
+
   sendMessageToOpenAi(message: string) {
     return message;
   }
@@ -20,5 +25,9 @@ export class MessagesService {
     });
 
     return response.choices[0].message.content;
+  }
+
+  async createMessage(messageData: Partial<Message>): Promise<Message> {
+    return this.messagesRepository.create(messageData);
   }
 }
