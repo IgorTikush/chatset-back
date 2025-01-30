@@ -6,6 +6,7 @@ import { MorganInterceptor, MorganModule } from 'nest-morgan';
 
 import { AuthModule } from './auth/auth.module';
 import { BillingModule } from './billing/billing.module';
+import { ChatModule } from './chat/chat.module';
 import { GlobalModule } from './global/global.module';
 import { LimitModule } from './limit/limit.module';
 import { MessagesModule } from './messages/messages.module';
@@ -25,6 +26,7 @@ import { UserModule } from './user/user.module';
     BillingModule,
     LimitModule,
     PlanModule,
+    ChatModule,
   ],
   providers: [
     {

@@ -28,10 +28,12 @@ export class MessagesController {
   @Sse()
   @UseGuards(AuthGuard('jwt'), PaymentAndLimitsGuard)
   @UseInterceptors(GptInterceptor)
-  async create(@Body() createMessageDto: any, @Req() req: any): Promise<any> {
+  async create(
+    @Body() createMessageDto: any,
+    @Req() req: any,
+  ): Promise<any> {
     const { user, tokenCounts } = req;
     if (!['GPT 4o-mini', 'GPT 4o'].includes(createMessageDto.model)) {
-      console.log('throw');
       throw new BadRequestException('модель не поддерживается');
     }
 
@@ -39,15 +41,21 @@ export class MessagesController {
       apiKey: config.get('openaiKey'),
     });
 
-    let outputTokens = 0;
-
     let modelName = 'gpt-4o-mini';
-
     if (createMessageDto.model === 'GPT 4o') {
       modelName = 'gpt-4o';
     }
 
     return new Observable((subscriber) => {
+      // First, send the headers as a special event
+      subscriber.next({
+        data: {
+          type: 'headers',
+          modelName,
+          // Add any other header data you want to send
+        },
+      });
+
       openai.chat.completions.create({
         model: modelName,
         messages: createMessageDto.messages,
@@ -56,13 +64,12 @@ export class MessagesController {
         const enc = encoding_for_model(modelName as TiktokenModel);
         for await (const chunk of stream) {
           const tokens = enc.encode(chunk.choices[0]?.delta?.content || '');
-          outputTokens += tokens.length;
           subscriber.next({ data: chunk });
         }
 
         this.userService.addRequest(user._id);
         if (modelName !== 'gpt-4o-mini') {
-          this.limitService.addUsedTokens({ inputTokens: tokenCounts, outputTokens, userId: user._id, model: modelName });
+          this.limitService.addUsedTokens({ inputTokens: tokenCounts, outputTokens: 0, userId: user._id, model: modelName });
         }
 
         subscriber.complete();
