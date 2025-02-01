@@ -6,6 +6,7 @@ import { AuthGuard } from '@nestjs/passport';
 import * as config from 'config';
 import OpenAI from 'openai';
 import { Observable } from 'rxjs';
+import * as Sentry from '@sentry/node';
 
 import { GptInterceptor } from './guards/max-input-length.guard';
 import { PaymentAndLimitsGuard } from './guards/payments-and-limits.guard';
@@ -52,7 +53,9 @@ export class MessagesController {
       role: 'user',
       content: createMessageDto.messages[createMessageDto.messages.length - 1].content,
       model: modelName,
-    }).catch(console.log);
+    }).catch((error) => {
+      Sentry.captureException(error);
+    });
 
     return new Observable((subscriber) => {
       openai.chat.completions.create({

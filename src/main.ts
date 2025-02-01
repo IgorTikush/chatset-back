@@ -6,6 +6,7 @@ import * as compression from 'compression';
 import * as express from 'express';
 import helmet from 'helmet';
 import * as logger from 'morgan';
+import * as Sentry from '@sentry/node';
 
 import { AppModule } from './app.module';
 
@@ -27,6 +28,11 @@ async function bootstrap() {
   app.use(helmet());
   app.use(bodyParser.urlencoded({ limit: '24mb', extended: true, parameterLimit: 100000 }));
   // app.use(express.urlencoded({ extended: true }));
+  Sentry.init({
+    dsn: 'https://49c1d898e6e6b446cdf1bd05e5b97976@sentry-new.amzn.pro/20',
+    // Performance Monitoring
+    tracesSampleRate: 1.0,
+  });
 
   app.enableShutdownHooks();
   app.useGlobalPipes(
