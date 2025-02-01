@@ -77,6 +77,64 @@ export class MessagesController {
     });
   }
 
+  @Post('openai/no-stream')
+  @UseGuards(AuthGuard('jwt'), PaymentAndLimitsGuard)
+  @UseInterceptors(GptInterceptor)
+  async createNoStream(@Body() createMessageDto: any, @Req() req: any): Promise<any> {
+    const { user, tokenCounts } = req;
+    if (!['GPT 4o-mini', 'GPT 4o'].includes(createMessageDto.model)) {
+      console.log('throw');
+      throw new BadRequestException('модель не поддерживается');
+    }
+
+    const openai = new OpenAI({
+      apiKey: config.get('openaiKey'),
+    });
+
+    let outputTokens = 0;
+
+    let modelName = 'gpt-4o-mini';
+
+    if (createMessageDto.model === 'GPT 4o') {
+      modelName = 'gpt-4o';
+    }
+
+    // this.messagesService.createMessage({
+    //   userId: user._id,
+    //   role: 'user',
+    //   content: createMessageDto.messages[createMessageDto.messages.length - 1].content,
+    //   model: modelName,
+    // }).catch(console.log);
+
+    return openai.chat.completions.create({
+      model: modelName,
+      messages: createMessageDto.messages,
+      stream: false,
+    });
+
+    // return new Observable((subscriber) => {
+    //   openai.chat.completions.create({
+    //     model: modelName,
+    //     messages: createMessageDto.messages,
+    //     stream: true,
+    //   }).then(async (stream) => {
+    //     const enc = encoding_for_model(modelName as TiktokenModel);
+    //     for await (const chunk of stream) {
+    //       const tokens = enc.encode(chunk.choices[0]?.delta?.content || '');
+    //       outputTokens += tokens.length;
+    //       subscriber.next({ data: chunk });
+    //     }
+
+    //     this.userService.addRequest(user._id);
+    //     if (modelName !== 'gpt-4o-mini') {
+    //       this.limitService.addUsedTokens({ inputTokens: tokenCounts, outputTokens, userId: user._id, model: modelName });
+    //     }
+
+    //     subscriber.complete();
+    //   });
+    // });
+  }
+
   @Post('image')
   @UseGuards(AuthGuard('jwt'), PaymentAndLimitsGuard)
   async getImage(@Body() createMessageDto: any, @Req() { user }: any): Promise<any> {
