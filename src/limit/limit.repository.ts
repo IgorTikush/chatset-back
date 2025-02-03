@@ -14,6 +14,7 @@ export class LimitRepository {
       availableTokens: limitParams.tokens,
       usedTokens: 0,
       expiredAt: limitParams.expiresIn,
+      planName: limitParams.planName,
     });
 
     return newLimit.save();

@@ -45,7 +45,7 @@ export class LimitService {
 
   async createLimit(userId: string, planId: string, paymentExpires): Promise<Limit> {
     const plan = await this.planService.getPlanById(planId);
-    console.log(plan.tokens);
+
     const limit = await this.limitRepository.create(userId, {
       tokens: plan?.tokens,
       expiresIn: paymentExpires,

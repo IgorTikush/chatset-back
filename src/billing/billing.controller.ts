@@ -25,7 +25,8 @@ export class BillingController {
       return 'ok';
     }
 
-    const plan = await this.billingService.getPlan(Number(event.Amount) * 100);
+    const amount = Number(event.Amount.replace(',', '.'));
+    const plan = await this.billingService.getPlan(amount * 100);
     if (!plan) {
       throw new Error('Plan not found');
     }
@@ -34,7 +35,7 @@ export class BillingController {
     const expirationDate = new Date(currentDate.setMonth(currentDate.getMonth() + 1));
 
     await this.billingService.processPayment({
-      amount: Number(event.Amount),
+      amount,
       status: event.Status,
       transactionId: event.TransactionId,
       planId: plan.id,
