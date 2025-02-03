@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
+import { SentryModule, SentryGlobalFilter } from '@sentry/nestjs/setup';
 import * as config from 'config';
 import { MorganInterceptor, MorganModule } from 'nest-morgan';
 
@@ -25,11 +26,16 @@ import { UserModule } from './user/user.module';
     BillingModule,
     LimitModule,
     PlanModule,
+    SentryModule.forRoot(),
   ],
   providers: [
     {
       provide: APP_INTERCEPTOR,
       useClass: MorganInterceptor('combined'),
+    },
+    {
+      provide: APP_FILTER,
+      useClass: SentryGlobalFilter,
     },
   ],
 })
