@@ -5,11 +5,11 @@ import * as Sentry from '@sentry/node';
 import { nodeProfilingIntegration } from '@sentry/profiling-node';
 import * as bodyParser from 'body-parser';
 import * as compression from 'compression';
-import * as express from 'express';
 import helmet from 'helmet';
 import * as logger from 'morgan';
 
 import { AppModule } from './app.module';
+import { SentryInterceptor } from './interceptors/sentry';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(
@@ -32,16 +32,9 @@ async function bootstrap() {
   Sentry.init({
     dsn: 'https://49c1d898e6e6b446cdf1bd05e5b97976@sentry-new.amzn.pro/20',
     integrations: [
-      // Add our Profiling integration
       nodeProfilingIntegration(),
     ],
-
-    // Add Tracing by setting tracesSampleRate
-    // We recommend adjusting this value in production
     tracesSampleRate: 1.0,
-
-    // Set sampling rate for profiling
-    // This is relative to tracesSampleRate
     profilesSampleRate: 1.0,
   });
 
@@ -53,6 +46,8 @@ async function bootstrap() {
       exceptionFactory: (errors => new BadRequestException(errors)),
     }),
   );
+
+  app.useGlobalInterceptors(new SentryInterceptor());
 
   await app.listen(3000);
 }
