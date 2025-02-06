@@ -3,10 +3,10 @@ import { encoding_for_model, TiktokenModel } from '@dqbd/tiktoken';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Controller, Post, Body, Param, Sse, UseGuards, Req, BadRequestException, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import * as Sentry from '@sentry/node';
 import * as config from 'config';
 import OpenAI from 'openai';
 import { Observable } from 'rxjs';
-import * as Sentry from '@sentry/node';
 
 import { GptInterceptor } from './guards/max-input-length.guard';
 import { PaymentAndLimitsGuard } from './guards/payments-and-limits.guard';
@@ -94,7 +94,7 @@ export class MessagesController {
       apiKey: config.get('openaiKey'),
     });
 
-    let outputTokens = 0;
+    const outputTokens = 0;
 
     let modelName = 'gpt-4o-mini';
 
@@ -149,6 +149,15 @@ export class MessagesController {
 
     const modelName = 'dall-e-3';
 
+    this.messagesService.createMessage({
+      userId: user._id,
+      role: 'user',
+      content: createMessageDto.messages[createMessageDto.messages.length - 1].content,
+      model: modelName,
+    }).catch((error) => {
+      Sentry.captureException(error);
+    });
+
     const openai = new OpenAI({
       apiKey: config.get('openaiKey'),
     });
@@ -174,7 +183,6 @@ export class MessagesController {
     @Req() { user }: any,
   ): Promise<any> {
     const translatedMessage = await this.messagesService.translateMessage(createMessageDto.prompt);
-
     const formData = new FormData();
     for (const paramsKey in createMessageDto) {
       console.log(paramsKey);
@@ -185,6 +193,15 @@ export class MessagesController {
 
       formData.append(paramsKey, createMessageDto[paramsKey]);
     }
+
+    this.messagesService.createMessage({
+      userId: user._id,
+      role: 'user',
+      content: translatedMessage,
+      model: createMessageDto.model,
+    }).catch((error) => {
+      Sentry.captureException(error);
+    });
 
     const res = await fetch(`https://api.stability.ai/v2beta/stable-image/generate/${model}`, {
       method: 'POST',
@@ -216,6 +233,15 @@ export class MessagesController {
     });
 
     const modelName = 'claude-3-5-sonnet-20240620';
+
+    this.messagesService.createMessage({
+      userId: user._id,
+      role: 'user',
+      content: createMessageDto.messages[createMessageDto.messages.length - 1].content,
+      model: createMessageDto.model,
+    }).catch((error) => {
+      Sentry.captureException(error);
+    });
 
     return new Observable((subscriber) => {
       const stream = client.messages.stream({
@@ -261,6 +287,15 @@ export class MessagesController {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
       model: createMessageDto.model,
+    });
+
+    this.messagesService.createMessage({
+      userId: user._id,
+      role: 'user',
+      content: createMessageDto.contents[createMessageDto.contents.length - 1],
+      model: createMessageDto.model,
+    }).catch((error) => {
+      Sentry.captureException(error);
     });
 
     const chatSession = model.startChat({

@@ -42,6 +42,13 @@ export class GptInterceptor implements NestInterceptor {
       return message;
     }).filter(message => message.content?.length > 0);
 
+    if (body.messages.length <= 1) {
+      body.messages.unshift({
+        role: 'system',
+        content: 'If the user asks to generate, create, or make an image/photo/picture, respond with: "To create images, please upgrade to Premium and use DALL-E 3 or Stable Diffusion models which are specifically designed for image generation."',
+      });
+    }
+
     request.tokenCounts = tokenCounts;
     console.log('tokenCounts', tokenCounts);
 
