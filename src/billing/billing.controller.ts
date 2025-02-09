@@ -54,5 +54,7 @@ export class BillingController {
     const userId = user._id;
 
     await this.billingService.cancelSubscription(userId);
+
+    return { code: 0 };
   }
 }
