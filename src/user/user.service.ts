@@ -112,12 +112,14 @@ export class UserService {
   }
 
   async updateLimits(userId: string, limits: object) {
-    return this.userModel.updateOne({
+    return this.userModel.findOneAndUpdate({
       _id: userId,
     }, {
       $set: {
         limits,
       },
+    }, {
+      sort: { _id: -1 },
     });
   }
 
