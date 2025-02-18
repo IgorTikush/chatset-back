@@ -26,7 +26,7 @@ export class LimitRepository {
 
   async updateByUserId(userId: string, maxLimit: number): Promise<Limit | null> {
     return this.limitModel.findOneAndUpdate(
-      { userId },
+      { userId, expiredAt: { $gte: new Date() } },
       { maxLimit },
       { new: true },
     );
@@ -34,14 +34,15 @@ export class LimitRepository {
 
   async addUsedTokens(chatsetTokens: number, userId: string): Promise<Limit | null> {
     return this.limitModel.findOneAndUpdate(
-      { userId },
+      { userId, expiredAt: { $gte: new Date() } },
       { $inc: { usedTokens: chatsetTokens } },
+      { sort: { createdAt: -1 } },
     );
   }
 
   async cancelSubscription(userId: string): Promise<void> {
     await this.limitModel.findOneAndUpdate(
-      { userId },
+      { userId, expiredAt: { $gte: new Date() } },
       { $set: { canceled: true } },
       { sort: { createdAt: -1 } },
     );
